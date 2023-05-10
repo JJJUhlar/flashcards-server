@@ -1,0 +1,11 @@
+<rail version="0.1">
+    <prompt>
+        Generate a sentence about the following text, where the first word must begin with the letter "{{letter}}". The first word, which will begin with the letter "{{letter}}", should make sense:
+
+        {{text}}
+        @complete_json_suffix
+    </prompt>
+    <output>
+        <string name="line" description="A fact about the given text, beginning where the first word begins with the appropriate letter" format="one-line" on-fail-one-line="reask"/>
+    </output>
+</rail>

@@ -1,0 +1,15 @@
+<rail version="0.1">
+    <prompt>
+        Given the following text, generate the front and back text for a flashcard. The front of the flashcard should be a simple question. The back of the flashcard should be the answer to the question. The answer to the question on the front of the flashcard should be as short and simple as possible. Generate only a single flashcard.
+        {{text}}
+        @complete_json_suffix
+    </prompt>
+    <output>
+        <list name="flashcards" description="generate a list containing a single flashcard" format="length: 1 1">
+            <object name="flashcard">
+                <string description="The front of the flashcard." name="front" required="true" />
+                <string description="The back of the flashcard." name="back" required="true" />
+            </object>
+        </list>
+    </output>
+</rail>

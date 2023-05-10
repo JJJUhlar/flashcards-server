@@ -1,0 +1,11 @@
+<rail version="0.1">
+    <prompt>
+        Make a rhyming song poem that sumarises the following text:.
+
+        {{text}}
+        @complete_json_suffix
+    </prompt>
+    <output>
+        <string name="rhyme" description="A rhyming poem that sumarises the given text." />
+    </output>
+</rail>

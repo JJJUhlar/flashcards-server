@@ -1,0 +1,20 @@
+<rail version="0.1">
+    <prompt>
+        Generate a list containing a single flashcard with multiple choice questions that summarise the following text. The front of the flashcard must have a simple question, with four similar seeming answers. Only one of the four answers must be true and correct. The back of the flashcard must say which of the four options is correct.
+        {{text}}
+        @complete_json_suffix
+    </prompt>
+    <output>
+        <list name="flashcards" description="generate a list of multiple choice flashcards" format="length: 1 1">
+            <object name="multiple choice question">
+                <string description="The front of the multiple choice flashcard." name="front" required="true" />
+                <list description="multiple choice options to front question" format="length: 4 4" name="back">
+                    <object description="option for multiple choice question">
+                        <string description="option for multiple choice question" name="option" />
+                        <bool description="Is this option the correct answer?" name="correct" required="true" />
+                    </object>
+                </list>
+            </object>
+        </list>
+    </output>
+</rail>

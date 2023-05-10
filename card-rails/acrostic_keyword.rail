@@ -1,0 +1,10 @@
+<rail version="0.1">
+    <prompt>
+        Choose a key word or phrase from the following text suitable for making an acrostic poem from.
+        {{text}}
+        @complete_json_suffix
+    </prompt>
+    <output>
+        <string name="acrostic" description="This is the key word for making an acrostic from" format="OneWord" on-fail-OneWord="reask"/>
+    </output>
+</rail>
