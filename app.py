@@ -2,7 +2,6 @@ from flask import *
 from flashcards import getFlashcards, addCards, getDueCards
 import os
 
-
 # other models include: text-davinci-002, text-curie-001, text-babbage-001, text-ada-001
 # Should build in redundancy w/ other models in case one is down
 
@@ -18,20 +17,19 @@ def flashcards():
     print('got request')
     try:
         text = request.json['text']
-        cardType = request.json['type']
-        cards = getFlashcards(str(text), str(type))
+        card_type = request.json['type']
+        cards = getFlashcards(str(text), str(card_type))
         print(cards)
 
         for card in cards['flashcards']:
             print(card, "<<<<")
             card['origin'] = request.json['url']
             card['input'] = text
-            card['type'] = cardType
+            card['type'] = card_type
 
         return jsonify(cards)    
     except:
         return jsonify({"msg": "couldn't get flashcards"})
-
 
 @app.route('/save_cards', methods=['POST'])
 def save_cards():
@@ -46,7 +44,7 @@ def save_cards():
             except:
                 print('error saving card:', card)
 
-        return( jsonify({"msg": "got cards!"}))
+        return jsonify({"msg": "got cards!"})
     except: 
         return jsonify({"msg": "couldn't find flashcards"})
     
@@ -54,6 +52,6 @@ def save_cards():
 def due_cards():
     try:
         due_cards = getDueCards()
-        return jsonify({"flashcards": due_cards})
+        return due_cards
     except:
         return jsonify({"msg": "couldn't get due cards"})

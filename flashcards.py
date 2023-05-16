@@ -7,22 +7,26 @@ from flask import jsonify
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-def getFlashcards(text, type="default", model="text-davinci-003"): 
+def getFlashcards(text, card_type="default", model="text-davinci-003"): 
     text = str(text)
+    print('getting cards', openai.api_key)
 
-    if type == "default":
+    if card_type == "default":
         flashcard_guard = gd.Guard.from_rail('./card-rails/default_flashcards.rail', num_reasks=1)
-        # print(str(model))
-        raw_llm_output, validated_output = flashcard_guard(
-            openai.Completion.create,
-            prompt_params={"text": text},
-            engine=model,
-            max_tokens=1024,
-            temperature=0.3,
-        )
+        try:
+            raw_llm_output, validated_output = flashcard_guard(
+                openai.Completion.create,
+                prompt_params={"text": text},
+                engine=model,
+                max_tokens=1024,
+                temperature=0.3,
+            )
+            return validated_output
+        except:
+            print('error getting cards')
+            return "error getting flashcards from model"
 
-        return validated_output
-    elif type == "acrostic":
+    elif card_type == "acrostic":
         acrostic_guard = gd.Guard.from_rail('./card-rails/acrostic_keyword.rail', num_reasks=1)
 
         acrostic = {}
@@ -49,7 +53,7 @@ def getFlashcards(text, type="default", model="text-davinci-003"):
                 acrostic[letter] = acrostic_line
 
         return acrostic
-    elif type == "mcq":
+    elif card_type == "mcq":
         mcq_guard = gd.Guard.from_rail('./card-rails/multiple_choice_cards.rail', num_reasks=1)
 
         raw_llm_output, validated_output = mcq_guard(
@@ -60,9 +64,7 @@ def getFlashcards(text, type="default", model="text-davinci-003"):
             temperature=0.3,
         )
         return validated_output
-
-
-    elif type == "rhyme":
+    elif card_type == "rhyme":
         rhyme_guard = gd.Guard.from_rail('./card-rails/rhyme.rail', num_reasks=1)
 
         raw_llm_output, validated_output = rhyme_guard(
@@ -74,7 +76,7 @@ def getFlashcards(text, type="default", model="text-davinci-003"):
         )
         return validated_output
     else:
-        return "couldn't get flashcards"
+        return "failed to get flashcards from model"
 
 
 def addCards(origin, input, card_type, card_front, card_back, status="new", owner="joseph" ):
