@@ -3,7 +3,9 @@ import openai
 import os 
 import psycopg2
 from psycopg2 import pool
+import psycopg2.extras
 from flask import jsonify
+import json
 
 postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.environ['DBUSER'],
                                                          password=os.environ['DBPASS'],
@@ -90,16 +92,9 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
 
         cur=conn.cursor()
 
-        cur.execute("INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner)"
-                "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                (origin,
-                input,
-                card_type,
-                card_front,
-                card_back,
-                status,
-                owner)
-                )
+        add_cards_sql = "INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        add_cards_query = (origin, input, card_type, card_front, card_back, status, owner)
+        cur.execute(add_cards_sql, add_cards_query)
         
         conn.commit()
         cur.close()
@@ -111,20 +106,20 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
     
 def getDueCards():
     try:
-
         conn = postgreSQL_pool.getconn()
+        cur=conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cur=conn.cursor()
-
-        due_cards = cur.execute("SELECT * FROM flashcards;")
+        cur.execute("SELECT * FROM flashcards;")
+        res = cur.fetchall()
+        due_cards = []
+        for row in res:
+            due_cards.append(dict(row))
+        print(due_cards, "cards")
         
-        print(due_cards, "<<<<")
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
 
-    
-
-        return jsonify({"due_cards": due_cards})
+        return due_cards
     except:
         return jsonify({"msg": "couldn't save cards! :\'("})

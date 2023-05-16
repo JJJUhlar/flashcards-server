@@ -23,9 +23,10 @@ cur.execute("CREATE TABLE flashcards (id serial PRIMARY KEY,"
              "last_reviewed TIMESTAMP,"
              "status VARCHAR(100),"
              "ease INTEGER DEFAULT 100,"
-             "owner VARCHAR(100));")
+             "owner VARCHAR(100),"
+             "due TIMESTAMP DEFAULT NULL;")
 
-values = [("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html",
+seed_cards = [("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html",
             "blah blah blah",
             "default",
             "What have the workers at Amazon been doing?",
@@ -54,7 +55,8 @@ values = [("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html
             "new",
             "Joseph")]
 
-cur.executemany("INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s)", values)
+seed_cards_sql = "INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+cur.executemany(seed_cards_sql, seed_cards)
 
 cur.execute("DROP TABLE IF EXISTS users;")
 cur.execute("CREATE TABLE users (id serial PRIMARY KEY,"
@@ -63,10 +65,9 @@ cur.execute("CREATE TABLE users (id serial PRIMARY KEY,"
             "password VARCHAR(100) NOT NULL,"
             "created_at date DEFAULT CURRENT_TIMESTAMP);")
 
-cur.execute("INSERT INTO users (username, email, password)"
-            "VALUES (%s, %s, %s)",
-            ("Joseph", "jjuhlar@gmail.com", "password")
-            )
+seed_cards_sql = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
+seed_users = "Joseph", "jjuhlar@gmail.com", "password"
+cur.execute(seed_cards_sql, seed_users)
 
 conn.commit()
 cur.close()
