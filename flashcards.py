@@ -26,7 +26,6 @@ def getFlashcards(text, type="default", model="text-davinci-003"):
         acrostic_guard = gd.Guard.from_rail('./card-rails/acrostic_keyword.rail', num_reasks=1)
 
         acrostic = {}
-
         raw_llm_output, validated_output = acrostic_guard(
             openai.Completion.create,
             prompt_params={"text": text},
@@ -90,11 +89,11 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
 
         cur.execute("INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner)"
                 "VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                ("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html",
-                "blah blah blah",
-                "default",
-                "What have the workers at Amazon been doing?",
-                "They have been trying to unionize.",
+                (origin,
+                input,
+                card_type,
+                card_front,
+                card_back,
                 status,
                 owner)
                 )

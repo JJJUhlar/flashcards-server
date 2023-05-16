@@ -39,7 +39,21 @@ def save_cards():
         new_cards = request.json['flashcards']
         print('recieved cards')
         print(new_cards)
+        for card in new_cards:
+            print(card)
+            try:
+                addCards(card['origin'], card['input'], card['type'], card['card_front'], card['card_back'])
+            except:
+                print('error saving card:', card)
+
         return( jsonify({"msg": "got cards!"}))
     except: 
         return jsonify({"msg": "couldn't find flashcards"})
     
+@app.route('/due_cards', methods=['GET'])
+def due_cards():
+    try:
+        due_cards = getDueCards()
+        return jsonify({"flashcards": due_cards})
+    except:
+        return jsonify({"msg": "couldn't get due cards"})
