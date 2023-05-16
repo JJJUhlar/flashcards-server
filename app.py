@@ -4,13 +4,18 @@ import guardrails as gd
 import openai
 import os
 
-os.environ["OPENAI_API_KEY"] = "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"
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
+
 # other models include: text-davinci-002, text-curie-001, text-babbage-001, text-ada-001
 # Should build in redundancy w/ other models in case one is down
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
+
+
 
 def getFlashcards(text, type="default", model="text-davinci-003"): 
     text = str(text)
@@ -93,18 +98,32 @@ def hello():
 def flashcards():
     print('got request')
 
-    text = request.json['text']
-    type = request.json['type']
+    try:
+        text = request.json['text']
+        cardType = request.json['type']
+        cards = getFlashcards(str(text), str(type))
+        print(cards)
+        
+        for card in cards['flashcards']:
+            print(card, "<<<<")
+            card['origin'] = request.json['url']
+            card['input'] = text
+            card['type'] = cardType
+
+        return jsonify(cards)
     
-    cards = getFlashcards(str(text), str(type))
-    print(cards)
-    return jsonify(cards)
+    except:
+        return jsonify({"msg": "couldn't get flashcards"})
+    
 
 @app.route('/new_cards', methods=['POST'])
 def new_cards():
     print('recieved cards')
-
-    new_cards = request.json['new_cards']
+ 
+    new_cards = request.json['flashcards']
 
     print(new_cards)
     return( jsonify({"msg": "got cards!"}))
+
+
+
