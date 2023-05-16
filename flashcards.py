@@ -2,8 +2,13 @@ import guardrails as gd
 import openai
 import os 
 import psycopg2
-
+from psycopg2 import pool
 from flask import jsonify
+
+postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.environ['DBUSER'],
+                                                         password=os.environ['DBPASS'],
+                                                         host=os.environ['DBHOST'],
+                                                         database=os.environ['DATABASE'])
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
@@ -81,11 +86,7 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
 
 def addCards(origin, input, card_type, card_front, card_back, status="new", owner="joseph" ):
     try: 
-        conn = psycopg2.connect(
-            host=os.environ['DBHOST'],
-            database=os.environ['DATABASE'],
-            user=os.environ['DBUSER'],
-            password=os.environ['DBPASS'])
+        conn = postgreSQL_pool.getconn()
 
         cur=conn.cursor()
 
@@ -102,27 +103,27 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
         
         conn.commit()
         cur.close()
-        conn.close()
+        postgreSQL_pool.putconn(conn)
 
         return jsonify({"msg": "saved cards!"})
     except:
         return jsonify({"msg": "couldn't save cards! :\'("})
     
 def getDueCards():
-    try: 
-        conn = psycopg2.connect(
-            host=os.environ['DBHOST'],
-            database=os.environ['DATABASE'],
-            user=os.environ['DBUSER'],
-            password=os.environ['DBPASS'])
+    try:
+
+        conn = postgreSQL_pool.getconn()
 
         cur=conn.cursor()
 
         due_cards = cur.execute("SELECT * FROM flashcards;")
-
+        
+        print(due_cards, "<<<<")
         conn.commit()
         cur.close()
-        conn.close()
+        postgreSQL_pool.putconn(conn)
+
+    
 
         return jsonify({"due_cards": due_cards})
     except:
