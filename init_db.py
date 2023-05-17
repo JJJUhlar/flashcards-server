@@ -15,16 +15,16 @@ cur=conn.cursor()
 cur.execute("DROP TABLE IF EXISTS flashcards;")
 cur.execute("CREATE TABLE flashcards (id serial PRIMARY KEY,"
             "origin VARCHAR(300),"
-             "input VARCHAR(2000),"
-             "card_type VARCHAR(100),"
-             "created_at date DEFAULT CURRENT_TIMESTAMP,"
-             "card_front VARCHAR(300),"
-             "card_back VARCHAR(300),"
-             "last_reviewed TIMESTAMP,"
-             "status VARCHAR(100),"
-             "ease INTEGER DEFAULT 100,"
-             "owner VARCHAR(100),"
-             "due TIMESTAMP DEFAULT NULL;")
+            "input VARCHAR(2000),"
+            "card_type VARCHAR(100),"
+            "created_at date DEFAULT CURRENT_TIMESTAMP,"
+            "card_front VARCHAR(300),"
+            "card_back VARCHAR(300),"
+            "last_reviewed TIMESTAMP,"
+            "status VARCHAR(100),"
+            "ease INTEGER DEFAULT 100,"
+            "owner VARCHAR(100),"
+            "due date DEFAULT NULL);")
 
 seed_cards = [("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html",
             "blah blah blah",

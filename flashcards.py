@@ -86,16 +86,16 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
         return "failed to get flashcards from model"
 
 
-def addCards(origin, input, card_type, card_front, card_back, status="new", owner="joseph" ):
+def addCards(origin, input, card_type, card_front, card_back, status="new", owner="Joseph" ):
     try: 
         conn = postgreSQL_pool.getconn()
-
         cur=conn.cursor()
 
-        add_cards_sql = "INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        add_cards_sql = "INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;"
         add_cards_query = (origin, input, card_type, card_front, card_back, status, owner)
         cur.execute(add_cards_sql, add_cards_query)
-        
+        print(cur.fetchone()[0])
+
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
@@ -104,12 +104,13 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
     except:
         return jsonify({"msg": "couldn't save cards! :\'("})
     
-def getDueCards():
+def getDueCards(n=10):
     try:
         conn = postgreSQL_pool.getconn()
         cur=conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        cur.execute("SELECT * FROM flashcards;")
+        get_due_cards_sql = "SELECT * FROM flashcards;"  
+        cur.execute(get_due_cards_sql)
         res = cur.fetchall()
         due_cards = []
         for row in res:
@@ -122,4 +123,38 @@ def getDueCards():
 
         return due_cards
     except:
-        return jsonify({"msg": "couldn't save cards! :\'("})
+        return jsonify({"msg": "error getting cards from db :\'("})
+    
+
+def updateCard(id):
+    try:
+        conn = postgreSQL_pool.getconn()
+        cur=conn.cursor()
+
+        update_card_sql = "UPDATE flashcards SET last_reviewed = CURRENT_TIMESTAMP WHERE id = %s;"  
+        cur.execute(update_card_sql, id)
+        
+        conn.commit()
+        cur.close()
+        postgreSQL_pool.putconn(conn)
+
+        return jsonify({"msg": "updated card!"})
+    except:
+        return jsonify({"msg": "couldn't update card! :\'("})
+
+def deleteCard(card_to_delete_id):
+    try:
+        conn = postgreSQL_pool.getconn()
+        cur=conn.cursor()
+
+        delete_card_sql = "DELETE FROM flashcards WHERE id = %s; RETURNING id;"  
+        cur.execute(delete_card_sql, card_to_delete_id)
+        print(cur.fetchone()[0])
+        
+        conn.commit()
+        cur.close()
+        postgreSQL_pool.putconn(conn)
+
+        return jsonify({"msg": "deleted card!"})
+    except:
+        return jsonify({"msg": "error deleting card from db! :\'("})
