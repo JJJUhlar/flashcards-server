@@ -130,6 +130,9 @@ def updateCard(id):
     try:
         conn = postgreSQL_pool.getconn()
         cur=conn.cursor()
+  
+        # default interval is 24 hours * card ease. 
+        # Increase by x2 when correct. Reset when wrong.
 
         update_card_sql = "UPDATE flashcards SET last_reviewed = CURRENT_TIMESTAMP WHERE id = %s;"  
         cur.execute(update_card_sql, id)
@@ -141,6 +144,27 @@ def updateCard(id):
         return jsonify({"msg": "updated card!"})
     except:
         return jsonify({"msg": "couldn't update card! :\'("})
+
+def resetCard(id):
+    try:
+        conn = postgreSQL_pool.getconn()
+        cur=conn.cursor()
+
+        update_last_viewed_card_sql = "UPDATE flashcards SET last_reviewed = CURRENT_TIMESTAMP WHERE id = %s;"  
+        cur.execute(update_last_viewed_card_sql, id)
+
+        reset_ease_sql = "UPDATE flashcards SET ease = 100 WHERE id = %s;"
+        cur.execute(update_last_viewed_card_sql, id)
+        # reset_due_date_sql = "UPDATE flashcards SET due = WHERE id = %s;"
+
+        conn.commit()
+        cur.close()
+        postgreSQL_pool.putconn(conn)
+
+        return jsonify({"msg": "updated card!"})
+    except:
+        return jsonify({"msg": "couldn't update card! :\'("})
+        
 
 def deleteCard(card_to_delete_id):
     try:

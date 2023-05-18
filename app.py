@@ -54,6 +54,7 @@ def due_cards():
     
 @app.route('/update_cards', methods=['PATCH'])
 def update_cards():
+
     try:
         cards_to_update = request.json['cards_to_update']
         print('recieved cards_to_update')
