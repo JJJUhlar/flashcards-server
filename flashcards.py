@@ -9,9 +9,9 @@ from datetime import datetime;
 from datetime import timedelta;
 
 postgreSQL_pool = pool.SimpleConnectionPool(1, 20, user=os.environ['DBUSER'],
-                                                         password=os.environ['DBPASS'],
-                                                         host=os.environ['DBHOST'],
-                                                         database=os.environ['DATABASE'])
+                                                    password=os.environ['DBPASS'],
+                                                    host=os.environ['DBHOST'],
+                                                    database=os.environ['DATABASE'])
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
