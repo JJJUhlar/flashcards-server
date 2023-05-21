@@ -24,7 +24,7 @@ cur.execute("CREATE TABLE flashcards (id serial PRIMARY KEY,"
             "status VARCHAR(100),"
             "ease INTEGER DEFAULT 100,"
             "owner VARCHAR(100),"
-            "due date DEFAULT NULL);")
+            "due date DEFAULT CURRENT_TIMESTAMP);")
 
 seed_cards = [("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html",
             "blah blah blah",
