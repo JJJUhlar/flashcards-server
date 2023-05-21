@@ -1,12 +1,11 @@
 from flask import *
-from flashcards import getFlashcards, addCards, getDueCards, updateCard, deleteCard
+from flashcards import getFlashcards, addCards, getDueCards, updateCard, deleteCard, resetCard
 import os
 
 app = Flask(__name__)
 
 @app.route('/',methods=['GET'])
 def hello():
-    print('got request')
     return jsonify({"msg": "hello flashcards!"})
 
 @app.route('/flashcards', methods=['POST'])
@@ -14,30 +13,23 @@ def flashcards():
     try:
         text = request.json['text']
         card_type = request.json['type']
-        cards = getFlashcards(str(text), str(card_type))
-        print(cards)
+        created_cards = getFlashcards(str(text), str(card_type))
 
-        for card in cards['flashcards']:
-            print(card, "<<card<<")
+        for card in created_cards['flashcards']:
             card['origin'] = request.json['url']
             card['input'] = text
             card['type'] = card_type
 
-        return jsonify(cards)    
+        return jsonify(created_cards)    
     except:
-        return jsonify({"msg": "couldn't get flashcards"})
+        return jsonify({"msg": "couldn't generate flashcards"})
 
 @app.route('/save_cards', methods=['POST'])
 def save_cards():
     try:
-        new_cards = request.json['flashcards']
-        print('recieved cards')
-        for card in new_cards:
-            
-            try:
-                addCards(card['origin'], card['input'], card['type'], card['front'], card['back'])
-            except:
-                print('error saving card:', card)
+        created_cards = request.json['created_cards']
+        for card in created_cards:
+            addCards(card['origin'], card['input'], card['type'], card['front'], card['back'])
 
         return jsonify({"msg": "got cards!"})
     except: 
@@ -48,25 +40,17 @@ def due_cards():
     #get number of cards to review from request
     try:
         due_cards = getDueCards(10)
-        return jsonify({"due_cards": due_cards})
+        return jsonify(due_cards)
     except:
         return jsonify({"msg": "couldn't get due cards"})
     
-@app.route('/update_cards', methods=['PATCH'])
-def update_cards():
+@app.route('/update_card', methods=['PATCH'])
+def update_card():
 
     try:
-        cards_to_update = request.json['cards_to_update']
-        print('recieved cards_to_update')
-        print(cards_to_update)
-        for card in cards_to_update:
-            print(card)
-            try:
-                updateCard(card['id'])
-            except:
-                print('error updating card:', card)
-
-        return jsonify({"msg": "updated cards!"})
+        card_to_update_id = request.json['card_to_update_id']
+        updateCard(card_to_update_id)
+        return jsonify({"msg": "updated card!"})
     except: 
         return jsonify({"msg": "couldn't update cards"})
     
@@ -74,8 +58,16 @@ def update_cards():
 def delete_card():
     try:
         card_to_delete_id = request.json['card_to_delete_id']
-        print('recieved card_to_delete')
         deleteCard(card_to_delete_id)
         return jsonify({"msg": "deleted card!"})
     except: 
         return jsonify({"msg": "couldn't delete card"})
+    
+@app.route('/reset_card', methods=['PATCH'])
+def reset_card():
+    try:
+        card_to_reset_id = request.json['card_to_reset_id']
+        resetCard(card_to_reset_id)
+        return jsonify({"msg": "reset card!"})
+    except: 
+        return jsonify({"msg": "couldn't reset card"})
