@@ -5,9 +5,10 @@ import psycopg2
 from psycopg2 import pool
 import psycopg2.extras
 from flask import jsonify
-import json
+from datetime import datetime;
+from datetime import timedelta;
 
-postgreSQL_pool = psycopg2.pool.SimpleConnectionPool(1, 20, user=os.environ['DBUSER'],
+postgreSQL_pool = pool.SimpleConnectionPool(1, 20, user=os.environ['DBUSER'],
                                                          password=os.environ['DBPASS'],
                                                          host=os.environ['DBHOST'],
                                                          database=os.environ['DATABASE'])
@@ -16,7 +17,6 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 def getFlashcards(text, card_type="default", model="text-davinci-003"): 
     text = str(text)
-    print('getting cards', openai.api_key)
 
     if card_type == "default":
         flashcard_guard = gd.Guard.from_rail('./card-rails/default_flashcards.rail', num_reasks=1)
@@ -94,14 +94,14 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
         add_cards_sql = "INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;"
         add_cards_query = (origin, input, card_type, card_front, card_back, status, owner)
         cur.execute(add_cards_sql, add_cards_query)
-        print(cur.fetchone()[0])
 
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
 
         return jsonify({"msg": "saved cards!"})
-    except:
+    except (Exception, psycopg2.Error) as error:
+        print("Error in insert operation", error)
         return jsonify({"msg": "couldn't save cards! :\'("})
     
 def getDueCards(n=10):
@@ -109,20 +109,23 @@ def getDueCards(n=10):
         conn = postgreSQL_pool.getconn()
         cur=conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        get_due_cards_sql = "SELECT * FROM flashcards;"  
-        cur.execute(get_due_cards_sql)
-        res = cur.fetchall()
+        get_due_cards_sql = "SELECT * FROM flashcards WHERE due = current_date ORDER BY due;"  
+        cur.execute(get_due_cards_sql, n)
+        records = cur.fetchall()
+
+        if len(records) == 0:
+            return jsonify({"msg": "no cards due today!"})
         due_cards = []
-        for row in res:
+        for row in records:
             due_cards.append(dict(row))
-        print(due_cards, "cards")
-        
+ 
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
 
         return due_cards
-    except:
+    except (Exception, psycopg2.Error) as error:
+        print("Error in select operation", error)
         return jsonify({"msg": "error getting cards from db :\'("})
     
 
@@ -131,18 +134,32 @@ def updateCard(id):
         conn = postgreSQL_pool.getconn()
         cur=conn.cursor()
   
-        # default interval is 24 hours * card ease. 
-        # Increase by x2 when correct. Reset when wrong.
+        get_card_ease_sql = "SELECT ease FROM flashcards WHERE id = (%s)"
+        cur.execute(get_card_ease_sql, [id])
+        card_ease = cur.fetchone()[0]
 
-        update_card_sql = "UPDATE flashcards SET last_reviewed = CURRENT_TIMESTAMP WHERE id = %s;"  
-        cur.execute(update_card_sql, id)
+        base_interval = 1
+        next_interval = timedelta(base_interval * (card_ease / 100))
+        next_due = datetime.now() + next_interval
         
+        update_card_reviewed_sql = """UPDATE flashcards SET last_reviewed = CURRENT_TIMESTAMP WHERE id = %s;"""
+        cur.execute(update_card_reviewed_sql, [id])
+        
+        update_card_due_sql = "UPDATE flashcards SET due = %s WHERE id = %s;"
+        cur.execute(update_card_due_sql, [next_due, id])
+
+        update_card_ease_sql = "UPDATE flashcards SET ease = ease * 2 WHERE id = %s RETURNING *;"
+        cur.execute(update_card_ease_sql, [id])
+
+        record = cur.fetchone()[0]
+
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
 
         return jsonify({"msg": "updated card!"})
-    except:
+    except (Exception, psycopg2.Error) as error:
+        print("Error in update operation", error)
         return jsonify({"msg": "couldn't update card! :\'("})
 
 def resetCard(id):
@@ -151,20 +168,25 @@ def resetCard(id):
         cur=conn.cursor()
 
         update_last_viewed_card_sql = "UPDATE flashcards SET last_reviewed = CURRENT_TIMESTAMP WHERE id = %s;"  
-        cur.execute(update_last_viewed_card_sql, id)
+        cur.execute(update_last_viewed_card_sql, [id])
 
         reset_ease_sql = "UPDATE flashcards SET ease = 100 WHERE id = %s;"
-        cur.execute(update_last_viewed_card_sql, id)
-        # reset_due_date_sql = "UPDATE flashcards SET due = WHERE id = %s;"
+        cur.execute(reset_ease_sql, [id])
+
+        reset_due_date_sql = "UPDATE flashcards SET due = CURRENT_TIMESTAMP + INTERVAL '1 DAY' WHERE id = %s RETURNING *;"
+        cur.execute(reset_due_date_sql, [id])
+
+        record = cur.fetchone()[0]
 
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
 
         return jsonify({"msg": "updated card!"})
-    except:
+    except (Exception, psycopg2.Error) as error:
+        print("Error in update operation", error)
         return jsonify({"msg": "couldn't update card! :\'("})
-        
+   
 
 def deleteCard(card_to_delete_id):
     try:
@@ -173,12 +195,12 @@ def deleteCard(card_to_delete_id):
 
         delete_card_sql = "DELETE FROM flashcards WHERE id = %s; RETURNING id;"  
         cur.execute(delete_card_sql, card_to_delete_id)
-        print(cur.fetchone()[0])
         
         conn.commit()
         cur.close()
         postgreSQL_pool.putconn(conn)
 
         return jsonify({"msg": "deleted card!"})
-    except:
+    except (Exception, psycopg2.Error) as error:
+        print("Error in update operation", error)
         return jsonify({"msg": "error deleting card from db! :\'("})
