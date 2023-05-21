@@ -4,10 +4,6 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/',methods=['GET'])
-def hello():
-    return jsonify({"msg": "hello flashcards!"})
-
 @app.route('/flashcards', methods=['POST'])
 def flashcards():
     try:
