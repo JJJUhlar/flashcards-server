@@ -22,7 +22,7 @@ print(instance)
 from database import init_connection_pool
 init_connection_pool()
 from models.flashcards import getFlashcards, addCards, getDueCards, updateCard, deleteCard, resetCard
-from models.users import generate_auth_token, check_password, authenticate_token
+from models.users import generate_auth_token, check_password, authenticate_token, get_user_id
 
 
 # print(FLASK_ENV)
@@ -85,7 +85,6 @@ def due_cards():
 def update_card():
     data = request.json
     try:
-        print("updating: ", data['card_to_update_id'])
         card_to_update_id = data['card_to_update_id']
         updateCard(card_to_update_id)
         return jsonify({"msg": "updated card!"})
@@ -121,8 +120,8 @@ def login():
     username = data['username']
     password = data['password']
 
-    #1 = user_id
-    token = generate_auth_token(1, username)
+    user_id = get_user_id(username)
+    token = generate_auth_token(user_id, username)
 
     login_successful = check_password(username, password)
 
