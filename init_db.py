@@ -2,6 +2,7 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 load_dotenv()
+import bcrypt
 
 conn = psycopg2.connect(
     host=os.environ['DBHOST'],
@@ -26,34 +27,111 @@ cur.execute("CREATE TABLE flashcards (id serial PRIMARY KEY,"
             "owner VARCHAR(100),"
             "due date DEFAULT CURRENT_TIMESTAMP);")
 
-seed_cards = [("https://www.nytimes.com/2021/03/31/technology/amazon-union-vote.html",
-            "blah blah blah",
+seed_cards = [("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
             "default",
-            "What have the workers at Amazon been doing?",
-            "They have been trying to unionize.",
+            "What is the capital of California?",
+            "Sacramento",
             "new",
-            "Joseph"),
-            ("https://en.wikipedia.org/wiki/Henry_VIII",
-            "Henry VIII (28 June 1491 – 28 January 1547) was King of England from 22 April 1509 until his death in 1547. Henry is best known for his six marriages, and for his efforts to have his first marriage (to Catherine of Aragon) annulled. His disagreement with Pope Clement VII about such an annulment led Henry to initiate the English Reformation, separating the Church of England from papal authority. He appointed himself Supreme Head of the Church of England and dissolved convents and monasteries, for which he was excommunicated by the pope.",
+            "Test1"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
             "default",
-            "Who was Henry VIII?",
-            "King of England from 1509 until his death in 1547.",
+            "What state is Santa Barbara in?",
+            "California",
             "new",
-            "Joseph"),
-            ("https://en.wikipedia.org/wiki/Henry_VIII",
-            "Henry VIII (28 June 1491 – 28 January 1547) was King of England from 22 April 1509 until his death in 1547. Henry is best known for his six marriages, and for his efforts to have his first marriage (to Catherine of Aragon) annulled. His disagreement with Pope Clement VII about such an annulment led Henry to initiate the English Reformation, separating the Church of England from papal authority. He appointed himself Supreme Head of the Church of England and dissolved convents and monasteries, for which he was excommunicated by the pope.",
+            "Test1"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
             "default",
-            "What is Henry VIII best known for?",
-            "Six marriages",
+            "What animal is on the flag of California?",
+            "The Californian Grizzly",
             "new",
-            "Joseph"),
-            ("https://en.wikipedia.org/wiki/Henry_VIII",
-            "Henry VIII (28 June 1491 – 28 January 1547) was King of England from 22 April 1509 until his death in 1547. Henry is best known for his six marriages, and for his efforts to have his first marriage (to Catherine of Aragon) annulled. His disagreement with Pope Clement VII about such an annulment led Henry to initiate the English Reformation, separating the Church of England from papal authority. He appointed himself Supreme Head of the Church of England and dissolved convents and monasteries, for which he was excommunicated by the pope.",
+            "Test1"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
             "default",
-            "What did Henry VIII do that led to the English Reformation?",
-            "Disagree with Pope Clement VII about an annulment of his first marriage.",
+            "Sacramento",
+            "What is the capital of California?",
             "new",
-            "Joseph")]
+            "Test2"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What state is Santa Barbara in?",
+            "California",
+            "new",
+            "Test2"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What animal is on the flag of California?",
+            "The Californian Grizzly",
+            "new",
+            "Test2"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What is the capital of California?",
+            "Sacramento",
+            "new",
+            "Test3"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What state is Santa Barbara in?",
+            "California",
+            "new",
+            "Test3"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What animal is on the flag of California?",
+            "The Californian Grizzly",
+            "new",
+            "Test3"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What is the capital of California?",
+            "Sacramento",
+            "new",
+            "Test4"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What state is Santa Barbara in?",
+            "California",
+            "new",
+            "Test4"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What animal is on the flag of California?",
+            "The Californian Grizzly",
+            "new",
+            "Test4"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What is the capital of California?",
+            "Sacramento",
+            "new",
+            "Test5"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What state is Santa Barbara in?",
+            "California",
+            "new",
+            "Test5"),
+            ("https://en.wikipedia.org/wiki/California",
+             "some facts about California",
+            "default",
+            "What animal is on the flag of California?",
+            "The Californian Grizzly",
+            "new",
+            "Test5")]
 
 seed_cards_sql = "INSERT INTO flashcards (origin, input, card_type, card_front, card_back, status, owner) VALUES (%s, %s, %s, %s, %s, %s, %s)"
 cur.executemany(seed_cards_sql, seed_cards)
@@ -61,13 +139,22 @@ cur.executemany(seed_cards_sql, seed_cards)
 cur.execute("DROP TABLE IF EXISTS users;")
 cur.execute("CREATE TABLE users (id serial PRIMARY KEY,"
             "username VARCHAR(100) UNIQUE,"
-            "email VARCHAR(100) NOT NULL,"
-            "password VARCHAR(100) NOT NULL,"
-            "created_at date DEFAULT CURRENT_TIMESTAMP);")
+            "email VARCHAR(200) UNIQUE,"
+            "password VARCHAR(200) NOT NULL,"
+            "created_at date DEFAULT CURRENT_TIMESTAMP,"
+            "updated_at date DEFAULT CURRENT_TIMESTAMP);")
 
 seed_cards_sql = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
-seed_users = "Joseph", "jjuhlar@gmail.com", "password"
-cur.execute(seed_cards_sql, seed_users)
+password = "password123"
+pwhash = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+seed_users = [("Test1", "test1@example.com", pwhash.decode('utf8')),
+              ("Test2", "test2@example.com", pwhash.decode('utf8')),
+              ("Test3", "test3@example.com", pwhash.decode('utf8')),
+              ("Test4", "test4@example.com", pwhash.decode('utf8')),
+              ("Test5", "test5@example.com", pwhash.decode('utf8'))]
+              ("Test5", "test5@example.com", pwhash.decode('utf8'))]
+
+cur.executemany(seed_cards_sql, seed_users)
 
 conn.commit()
 cur.close()
