@@ -1,56 +1,100 @@
+from config.testing_config import TestingConfig
+from config.production_config import ProductionConfig
+from config.development_config import DevelopmentConfig
 from flask import *
-from flashcards import getFlashcards, addCards, getDueCards, updateCard, deleteCard, resetCard
 import os
+from dotenv import load_dotenv
+
+instance = os.environ.get('FLASK_ENV')
 
 app = Flask(__name__)
+if instance == 'testing':
+    load_dotenv(f"./.env.{instance}")
+    app.config.from_object(TestingConfig)
+elif instance == 'production':
+    load_dotenv(f"./.env.{instance}")
+    app.config.from_object(ProductionConfig)
+else:
+    load_dotenv(f"./.env.{instance}")
+    app.config.from_object(DevelopmentConfig)
+print(instance)
 
-@app.route('/flashcards', methods=['POST'])
+from database import init_connection_pool
+init_connection_pool()
+from models.flashcards import getFlashcards, addCards, getDueCards, updateCard, deleteCard, resetCard
+from models.users import generate_auth_token, check_password, authenticate_token
+
+
+# print(FLASK_ENV)
+
+@app.route('/api/flashcards', methods=['POST'])
+@authenticate_token
 def flashcards():
+    data = request.json
+    print(data)
+
     try:
-        text = request.json['text']
-        card_type = request.json['type']
-        created_cards = getFlashcards(str(text), str(card_type))
+        created_cards = getFlashcards(str(data['text']))
+        if created_cards:
+            for card in created_cards['flashcards']:
+                card['origin'] = data['origin']
+                card['input'] = data['text']
+                card['card_back'] = card['back']
+                card['card_front'] = card['front']
+                del card['front']
+                del card['back']
 
-        for card in created_cards['flashcards']:
-            card['origin'] = request.json['url']
-            card['input'] = text
-            card['type'] = card_type
-
+        print(created_cards)
         return jsonify(created_cards)    
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({"msg": "couldn't generate flashcards"})
 
-@app.route('/save_cards', methods=['POST'])
+
+@app.route('/api/save_cards', methods=['POST'])
+@authenticate_token
 def save_cards():
+
     try:
         created_cards = request.json['created_cards']
+        print(created_cards)
         for card in created_cards:
-            addCards(card['origin'], card['input'], card['type'], card['front'], card['back'])
+            addCards(card['url'], card['input'], card['type'], card['card_front'], card['card_back'])
 
         return jsonify({"msg": "got cards!"})
     except: 
         return jsonify({"msg": "couldn't find flashcards"})
 
-@app.route('/due_cards', methods=['GET'])
+
+@app.route('/api/due_cards', methods=['GET'])
+@authenticate_token
 def due_cards():
     #get number of cards to review from request
+    data = request.args
+    username = data['username']
+
     try:
-        due_cards = getDueCards(10)
+        due_cards = getDueCards(username, 10)
         return jsonify(due_cards)
     except:
         return jsonify({"msg": "couldn't get due cards"})
     
-@app.route('/update_card', methods=['PATCH'])
-def update_card():
 
+@app.route('/api/update_card', methods=['PATCH'])
+@authenticate_token
+def update_card():
+    data = request.json
     try:
-        card_to_update_id = request.json['card_to_update_id']
+        print("updating: ", data['card_to_update_id'])
+        card_to_update_id = data['card_to_update_id']
         updateCard(card_to_update_id)
         return jsonify({"msg": "updated card!"})
     except: 
         return jsonify({"msg": "couldn't update cards"})
     
-@app.route('/delete_card', methods=['DELETE'])
+
+@app.route('/api/delete_card', methods=['DELETE'])
+@authenticate_token
 def delete_card():
     try:
         card_to_delete_id = request.json['card_to_delete_id']
@@ -59,11 +103,30 @@ def delete_card():
     except: 
         return jsonify({"msg": "couldn't delete card"})
     
-@app.route('/reset_card', methods=['PATCH'])
+
+@app.route('/api/reset_card', methods=['PATCH'])
+@authenticate_token
 def reset_card():
     try:
         card_to_reset_id = request.json['card_to_reset_id']
         resetCard(card_to_reset_id)
         return jsonify({"msg": "reset card!"})
-    except: 
+    except:
         return jsonify({"msg": "couldn't reset card"})
+    
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data['username']
+    password = data['password']
+
+    #1 = user_id
+    token = generate_auth_token(1, username)
+
+    login_successful = check_password(username, password)
+
+    if login_successful == True:
+        return jsonify({"msg": "Login successful!", 'sessionToken': token, 'username': username})
+    else:
+        abort(401, description="Incorrect username or password")
