@@ -20,8 +20,7 @@ def getFlashcards(input_text, card_type="default", model="text-davinci-003"):
     input_params = {"text": input_text}
     if card_type == "default":
         flashcard_guard = gd.Guard.from_rail('card-rails/default_flashcards.rail', num_reasks=1)
-        print(flashcard_guard)
-
+        
         try:
             validated_output = flashcard_guard(
                 openai.Completion.create,
