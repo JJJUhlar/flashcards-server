@@ -25,7 +25,7 @@ def authenticate_token(func):
 
 
 def generate_auth_token(user_id, username):
-    expiration = datetime.utcnow() + timedelta(minutes=int(os.environ.get('DEFAULT_SESSION_LENGTH')))
+    expiration = datetime.utcnow() + timedelta(minutes=int(10))
     payload = {
         'user_id': user_id,
         'username': username,
@@ -54,6 +54,20 @@ def add_user(username, password, email):
 
     return {"message": "created user"}
 
+def get_user_id(username):
+    conn = connection_pool.getconn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT id FROM users WHERE username = %s", (username,))  
+        row = cursor.fetchone()
+        user_id = int(row[0]) if row else 1
+    except Exception as e:
+        print('ERROR getting user id from database')
+        print(e)
+    finally:
+        cursor.close()
+        connection_pool.putconn(conn)
+    return user_id
 
 def check_password(username, password):
     conn = connection_pool.getconn()
