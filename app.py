@@ -1,23 +1,25 @@
-from config.testing_config import TestingConfig
-from config.production_config import ProductionConfig
-from config.development_config import DevelopmentConfig
 from flask import *
 import os
 from dotenv import load_dotenv
 
 instance = os.environ.get('FLASK_ENV')
+load_dotenv(f"./.env.{instance}")
+
+from config.testing_config import TestingConfig
+from config.production_config import ProductionConfig
+from config.development_config import DevelopmentConfig
 
 app = Flask(__name__)
 if instance == 'testing':
-    load_dotenv(f"./.env.{instance}")
     app.config.from_object(TestingConfig)
 elif instance == 'production':
-    load_dotenv(f"./.env.{instance}")
     app.config.from_object(ProductionConfig)
 else:
-    load_dotenv(f"./.env.{instance}")
     app.config.from_object(DevelopmentConfig)
-print(instance)
+
+print("instance: ", instance)
+print(load_dotenv(f"./.env.{instance}"))
+print(app.config)
 
 from database import init_connection_pool
 init_connection_pool()
@@ -31,10 +33,12 @@ from models.users import generate_auth_token, check_password, authenticate_token
 @authenticate_token
 def flashcards():
     data = request.json
-    print(data)
 
+    text = data['text']
+    str(text)
+    print(text)
     try:
-        created_cards = getFlashcards(str(data['text']))
+        created_cards = getFlashcards(text)
         if created_cards:
             for card in created_cards['flashcards']:
                 card['origin'] = data['origin']
