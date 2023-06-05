@@ -14,12 +14,13 @@ def getFlashcards(input_text, card_type="default", model="text-davinci-003"):
     input_text = str(input_text)
     print(input_text)
     print(openai.api_key)
+    input_params = {"text": input_text}
     if card_type == "default":
         flashcard_guard = gd.Guard.from_rail('./card-rails/default_flashcards.rail', num_reasks=1)
         try:
             raw_llm_output, validated_output = flashcard_guard(
                 openai.Completion.create,
-                prompt_params={"text": input_text},
+                prompt_params= input_params,
                 engine=model,
                 max_tokens=1024,
                 temperature=0.3,
