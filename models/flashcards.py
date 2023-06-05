@@ -7,26 +7,33 @@ from flask import jsonify
 from datetime import datetime;
 from datetime import timedelta;
 from database import connection_pool
+from rich import print
+import json
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 def getFlashcards(input_text, card_type="default", model="text-davinci-003"): 
     input_text = str(input_text)
-    print(input_text)
-    print(openai.api_key)
+    print("input text: ", input_text)
+    print("key: ", openai.api_key)
+    json.dumps(input_text)
     input_params = {"text": input_text}
     if card_type == "default":
-        flashcard_guard = gd.Guard.from_rail('./card-rails/default_flashcards.rail', num_reasks=1)
+        flashcard_guard = gd.Guard.from_rail('card-rails/default_flashcards.rail', num_reasks=1)
+        print(flashcard_guard)
+
         try:
-            raw_llm_output, validated_output = flashcard_guard(
+            validated_output = flashcard_guard(
                 openai.Completion.create,
-                prompt_params= input_params,
+                prompt_params= dict(input_params),
                 engine=model,
                 max_tokens=1024,
                 temperature=0.3,
             )
+            print(flashcard_guard.state.most_recent_call.tree)
             return validated_output
         except Exception as e:
+            print(flashcard_guard.state.most_recent_call)
             print('error getting cards: ', e)
             return "error getting flashcards from model"
 

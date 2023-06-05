@@ -137,4 +137,4 @@ def login():
         abort(401, description="Incorrect username or password")
 
 
-print(getFlashcards("The Mexican Cession (Spanish: Cesión mexicana) is the region in the modern-day southwestern United States that Mexico originally controlled, then ceded to the United States in the Treaty of Guadalupe Hidalgo in 1848 after the Mexican–American War. This region had not been part of the areas east of the Rio Grande that had been claimed by the Republic of Texas, though the Texas annexation resolution two years earlier had not specified the southern and western boundary of the new state of Texas."))
+print("test", getFlashcards("The Mexican Cession (Spanish: Cesión mexicana) is the region in the modern-day southwestern United States that Mexico originally controlled, then ceded to the United States in the Treaty of Guadalupe Hidalgo in 1848 after the Mexican–American War. This region had not been part of the areas east of the Rio Grande that had been claimed by the Republic of Texas, though the Texas annexation resolution two years earlier had not specified the southern and western boundary of the new state of Texas."))

@@ -152,7 +152,6 @@ seed_users = [("Test1", "test1@example.com", pwhash.decode('utf8')),
               ("Test3", "test3@example.com", pwhash.decode('utf8')),
               ("Test4", "test4@example.com", pwhash.decode('utf8')),
               ("Test5", "test5@example.com", pwhash.decode('utf8'))]
-              ("Test5", "test5@example.com", pwhash.decode('utf8'))]
 
 cur.executemany(seed_cards_sql, seed_users)
 
