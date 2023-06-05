@@ -10,16 +10,16 @@ from database import connection_pool
 
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-def getFlashcards(text, card_type="default", model="text-davinci-003"): 
-    text = str(text)
-    print(text)
+def getFlashcards(input_text, card_type="default", model="text-davinci-003"): 
+    input_text = str(input_text)
+    print(input_text)
     print(openai.api_key)
     if card_type == "default":
         flashcard_guard = gd.Guard.from_rail('./card-rails/default_flashcards.rail', num_reasks=1)
         try:
             raw_llm_output, validated_output = flashcard_guard(
                 openai.Completion.create,
-                prompt_params={"text": text},
+                prompt_params={"text": input_text},
                 engine=model,
                 max_tokens=1024,
                 temperature=0.3,
@@ -35,7 +35,7 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
         acrostic = {}
         raw_llm_output, validated_output = acrostic_guard(
             openai.Completion.create,
-            prompt_params={"text": text},
+            prompt_params={"text": input_text},
             engine=model,
             max_tokens=1024,
             temperature=0.3,
@@ -48,7 +48,7 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
                 acrostic_line_guard = gd.Guard.from_rail('./card-rails/acrostic_line.rail', num_reasks=1)
                 raw_llm_output, acrostic_line = acrostic_line_guard(
                     openai.Completion.create,
-                    prompt_params={"text": text, "letter": letter},
+                    prompt_params={"text": input_text, "letter": letter},
                     engine=model,
                     max_tokens=1024,
                     temperature=0.3,
@@ -61,7 +61,7 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
 
         raw_llm_output, validated_output = mcq_guard(
             openai.Completion.create,
-            prompt_params={"text": text},
+            prompt_params={"text": input_text},
             engine=model,
             max_tokens=1024,
             temperature=0.3,
@@ -73,7 +73,7 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
 
         raw_llm_output, validated_output = rhyme_guard(
             openai.Completion.create,
-            prompt_params={"text": text},
+            prompt_params={"text": input_text},
             engine=model,
             max_tokens=1024,
             temperature=0.3,

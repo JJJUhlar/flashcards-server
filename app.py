@@ -34,12 +34,14 @@ from models.users import generate_auth_token, check_password, authenticate_token
 def flashcards():
     data = request.json
 
-    text = str(data['text'])
+    text = data['text']
     print(text)
-    
+
     try:
         created_cards = getFlashcards(text)
-        if created_cards:
+        if created_cards == "error getting flashcards from model":
+            return jsonify({"msg": "couldn't generate flashcards"})
+        elif created_cards:
             for card in created_cards['flashcards']:
                 card['origin'] = data['origin']
                 card['input'] = data['text']
