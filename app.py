@@ -35,7 +35,6 @@ def flashcards():
     data = request.json
 
     input_text = data['text']
-    print(input_text)
 
     try:
         created_cards = getFlashcards(input_text)
@@ -43,7 +42,6 @@ def flashcards():
             return jsonify({"msg": "couldn't generate flashcards"})
         elif created_cards:
             for card in created_cards[1]['flashcards']:
-                print(type(card))
                 card['origin'] = data['origin']
                 card['input'] = data['text']
                 card['card_back'] = card['back']
@@ -52,7 +50,7 @@ def flashcards():
                 del card['back']
 
         print(created_cards)
-        return jsonify(created_cards)    
+        return jsonify(created_cards[1])    
     except Exception as e:
         print(e)
         return jsonify({"msg": "couldn't generate flashcards"})
