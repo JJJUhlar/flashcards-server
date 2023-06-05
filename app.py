@@ -39,11 +39,10 @@ def flashcards():
 
     try:
         created_cards = getFlashcards(input_text)
-        print(type(created_cards), "<<")
         if created_cards == "error getting flashcards from model":
             return jsonify({"msg": "couldn't generate flashcards"})
         elif created_cards:
-            for card in list(created_cards['flashcards']):
+            for card in created_cards[1]['flashcards']:
                 print(type(card))
                 card['origin'] = data['origin']
                 card['input'] = data['text']
