@@ -25,8 +25,8 @@ def getFlashcards(text, card_type="default", model="text-davinci-003"):
                 temperature=0.3,
             )
             return validated_output
-        except:
-            print('error getting cards')
+        except Exception as e:
+            print('error getting cards: ', e)
             return "error getting flashcards from model"
 
     elif card_type == "acrostic":

@@ -34,9 +34,9 @@ from models.users import generate_auth_token, check_password, authenticate_token
 def flashcards():
     data = request.json
 
-    text = data['text']
-    str(text)
+    text = str(data['text'])
     print(text)
+    
     try:
         created_cards = getFlashcards(text)
         if created_cards:
