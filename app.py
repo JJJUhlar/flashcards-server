@@ -39,11 +39,11 @@ def flashcards():
 
     try:
         created_cards = getFlashcards(input_text)
-        print(type(created_cards))
+        print(type(created_cards), "<<")
         if created_cards == "error getting flashcards from model":
             return jsonify({"msg": "couldn't generate flashcards"})
         elif created_cards:
-            for card in created_cards['flashcards']:
+            for card in list(created_cards['flashcards']):
                 print(type(card))
                 card['origin'] = data['origin']
                 card['input'] = data['text']
@@ -137,6 +137,3 @@ def login():
         return jsonify({"msg": "Login successful!", 'sessionToken': token, 'username': username})
     else:
         abort(401, description="Incorrect username or password")
-
-
-print("test", getFlashcards("The Mexican Cession (Spanish: Cesión mexicana) is the region in the modern-day southwestern United States that Mexico originally controlled, then ceded to the United States in the Treaty of Guadalupe Hidalgo in 1848 after the Mexican–American War. This region had not been part of the areas east of the Rio Grande that had been claimed by the Republic of Texas, though the Texas annexation resolution two years earlier had not specified the southern and western boundary of the new state of Texas."))
