@@ -102,7 +102,7 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
         return jsonify({"msg": "saved cards!"})
     except (Exception, psycopg2.Error) as error:
         print("Error in insert operation", error)
-        return jsonify({"msg": "couldn't save cards! :\'("})
+        return jsonify({"msg": "couldn't insert cards! :\'("})
     finally:
         conn.commit()
         cur.close()

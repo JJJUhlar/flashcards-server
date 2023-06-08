@@ -46,6 +46,7 @@ def flashcards():
                 card['input'] = data['text']
                 card['card_back'] = card['back']
                 card['card_front'] = card['front']
+                card['card_type'] = "default"
                 del card['front']
                 del card['back']
 
@@ -63,6 +64,7 @@ def save_cards():
     try:
         created_cards = request.json['created_cards']
         username = request.json['username']
+        print(username)
         print(created_cards)
         for card in created_cards:
             addCards(card['url'], card['input'], card['type'], card['card_front'], card['card_back'], owner = username)
