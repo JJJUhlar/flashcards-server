@@ -108,7 +108,6 @@ def addCards(origin, input, card_type, card_front, card_back, status="new", owne
         cur.close()
         connection_pool.putconn(conn)
 
-
 def getDueCards(username, n=10):
     conn = connection_pool.getconn()
     cur=conn.cursor(cursor_factory=psycopg2.extras.DictCursor)

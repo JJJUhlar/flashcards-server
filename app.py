@@ -62,13 +62,14 @@ def save_cards():
 
     try:
         created_cards = request.json['created_cards']
+        username = request.json['username']
         print(created_cards)
         for card in created_cards:
-            addCards(card['url'], card['input'], card['type'], card['card_front'], card['card_back'])
+            addCards(card['url'], card['input'], card['type'], card['card_front'], card['card_back'], owner = username)
 
-        return jsonify({"msg": "got cards!"})
+        return jsonify({"msg": "saved cards!"})
     except: 
-        return jsonify({"msg": "couldn't find flashcards"})
+        return jsonify({"msg": "couldn't save flashcards"})
 
 
 @app.route('/api/due_cards', methods=['GET'])
