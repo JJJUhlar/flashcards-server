@@ -24,10 +24,9 @@ def authenticate_token(func):
     return wrapper
 
 
-def generate_auth_token(user_id, username):
+def generate_auth_token(username):
     expiration = datetime.utcnow() + timedelta(minutes=int(10))
     payload = {
-        'user_id': user_id,
         'username': username,
         'exp': expiration
     }

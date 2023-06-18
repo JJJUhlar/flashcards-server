@@ -124,16 +124,12 @@ def reset_card():
 
 @app.route('/api/login', methods=['POST'])
 def login():
+
     data = request.json
-    username = data['username']
-    password = data['password']
+    user = data['user']
 
-    user_id = get_user_id(username)
-    token = generate_auth_token(user_id, username)
-
-    login_successful = check_password(username, password)
-
-    if login_successful == True:
-        return jsonify({"msg": "Login successful!", 'sessionToken': token, 'username': username})
+    if user:
+        token = generate_auth_token(user)
+        return jsonify({"msg": "Login successful!", 'sessionToken': token, 'username': user})
     else:
-        abort(401, description="Incorrect username or password")
+        abort(401, description="No user provided")
