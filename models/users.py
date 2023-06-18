@@ -14,7 +14,6 @@ def authenticate_token(func):
             abort(401)
         try:
             payload = jwt.decode(token, os.environ.get('SECRET_KEY'), algorithms=['HS256'])
-            user_id = payload['user_id']
             username = payload['username']
         except (jwt.ExpiredSignatureError, jwt.InvalidSignatureError):
             abort(401, "Token is invalid or expired. Please log in again.")
