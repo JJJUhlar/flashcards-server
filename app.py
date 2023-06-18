@@ -67,7 +67,7 @@ def save_cards():
         print(username)
         print(created_cards)
         for card in created_cards:
-            addCards(card['url'], card['input'], card['type'], card['card_front'], card['card_back'], owner = username)
+            addCards(card['origin'], card['input'], card['type'], card['card_front'], card['card_back'], owner = username)
 
         return jsonify({"msg": "saved cards!"})
     except: 
