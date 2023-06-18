@@ -70,7 +70,8 @@ def save_cards():
             addCards(card['origin'], card['input'], card['type'], card['card_front'], card['card_back'], "new", username)
 
         return jsonify({"msg": "saved cards!"})
-    except: 
+    except (Exception) as error: 
+        print("error: ", error)
         return jsonify({"msg": "couldn't save flashcards"})
 
 
