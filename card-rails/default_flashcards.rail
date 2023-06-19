@@ -1,6 +1,6 @@
 <rail version="0.1">
     <prompt>
-        Given the following text, generate the front and back text for a flashcard. The front of the flashcard should be a simple question. The back of the flashcard should be the answer to the question. The answer to the question on the front of the flashcard should be as short and simple as possible. Generate the fewest number of flashcards necessary to sumarise the input text.
+        Given the following text, generate the front and back text for a flashcard. The front of the flashcard should be a simple question. The back of the flashcard should be the answer to the question. The answer to the question on the front of the flashcard should be as short and simple as possible. Make sure to reference the topic of the question on the front of the flashcard. Generate the fewest number of flashcards necessary to sumarise the input text.
         {{text}}
         @complete_json_suffix
     </prompt>
